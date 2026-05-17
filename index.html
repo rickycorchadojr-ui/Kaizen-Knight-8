@@ -605,23 +605,42 @@ function stopPet(){
 }
 
 function startBlink(){
-  clearInterval(blinkTimer);
+  // Blink is now controlled by the movement/bob cycle.
+  // No separate blink timer needed.
+}
 
-  blinkTimer=setInterval(()=>{
+function startPet(delay=0){
+  stopPet();
+
+  setTimeout(()=>{
+    const walker=document.getElementById("petWalker");
     const pet=document.getElementById("petImg");
-    if(!pet) return;
-    if(pet.dataset.canBlink!=="true") return;
+    if(!walker || !pet) return;
 
-    pet.src="blink.png";
+    petStep=0;
+    walker.style.left=petPositions[petStep]+"%";
 
-    setTimeout(()=>{
-      const petAgain=document.getElementById("petImg");
-      if(petAgain && petAgain.dataset.canBlink==="true"){
-        petAgain.src="knight.png";
+    moveTimer=setInterval(()=>{
+      const current=petPositions[petStep];
+      petStep=(petStep+1)%petPositions.length;
+      const next=petPositions[petStep];
+
+      if(next>current){
+        walker.className="pet-walker right";
+        pet.src=getPetImage(pet.dataset.petType);
+      }else if(next<current){
+        walker.className="pet-walker left";
+        pet.src=getPetImage(pet.dataset.petType);
+      }else{
+        if(pet.dataset.canBlink==="true"){
+          pet.src="blink.png";
+        }
       }
-    },140);
 
-  },3600);
+      walker.style.left=next+"%";
+    },1200);
+
+  },delay);
 }
 
 function startPet(delay=0){
