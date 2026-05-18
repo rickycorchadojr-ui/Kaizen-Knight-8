@@ -32,8 +32,8 @@
     }
 
     .device{
-      width:min(92vw, 420px);
-      height:min(86vh, 740px);
+      width:min(92vw,420px);
+      height:min(86vh,740px);
       background:#d8d0b0;
       border:6px solid #111;
       border-radius:24px;
@@ -54,7 +54,9 @@
     }
 
     .screen.off,
-    .screen.boot-dark{ background:#111; }
+    .screen.boot-dark{
+      background:#111;
+    }
 
     .status-bar{
       height:38px;
@@ -84,14 +86,23 @@
       overflow:hidden;
     }
 
-    .power-btn{
-      background:#e9ecd8;
-      color:#111;
+    .power-quote{
+      width:88%;
+      background:#111;
+      color:#e9ecd8;
       border:4px solid #e9ecd8;
       font-family:'VT323', monospace;
-      font-size:34px;
-      padding:8px 22px;
+      font-size:24px;
+      line-height:1.02;
+      padding:14px 12px;
       box-shadow:none;
+      text-align:center;
+    }
+
+    .power-author{
+      display:block;
+      margin-top:10px;
+      font-size:22px;
     }
 
     .boot-text{
@@ -121,7 +132,9 @@
       transform:translateX(-50%);
     }
 
-    .pet-bob{ animation:bob 1.2s infinite steps(2); }
+    .pet-bob{
+      animation:bob 1.2s infinite steps(2);
+    }
 
     .pet-img{
       width:160px;
@@ -134,8 +147,13 @@
       filter:grayscale(1) contrast(2) brightness(.55);
     }
 
-    .pet-walker.right .pet-img{ transform:scaleX(-1); }
-    .pet-walker.left .pet-img{ transform:scaleX(1); }
+    .pet-walker.right .pet-img{
+      transform:scaleX(-1);
+    }
+
+    .pet-walker.left .pet-img{
+      transform:scaleX(1);
+    }
 
     @keyframes bob{
       0%{transform:translateY(0)}
@@ -168,7 +186,6 @@
     .panel{
       width:100%;
       height:100%;
-      min-height:0;
       display:flex;
       flex-direction:column;
       background:#f8f8f8;
@@ -184,7 +201,6 @@
 
     .scroll{
       flex:1;
-      min-height:0;
       overflow-y:auto;
       padding:8px 10px;
       box-sizing:border-box;
@@ -201,9 +217,9 @@
       display:flex;
       align-items:flex-start;
       gap:8px;
-      margin-bottom:6px;
+      margin-bottom:8px;
       font-size:22px;
-      line-height:.95;
+      line-height:1.0;
     }
 
     .box{
@@ -213,24 +229,25 @@
       background:#f8f8f8;
       flex-shrink:0;
       cursor:pointer;
-      margin-top:1px;
+      margin-top:2px;
     }
 
-    .box.checked{ background:#111; }
+    .box.checked{
+      background:#111;
+    }
 
     .note{
       font-size:22px;
-      line-height:1.0;
-      margin-bottom:10px;
+      line-height:1.05;
+      margin-bottom:12px;
       padding-bottom:8px;
       border-bottom:2px dotted #111;
     }
 
     .small-note{
       font-size:19px;
-      line-height:.95;
       opacity:.85;
-      margin:4px 0 8px;
+      margin:4px 0 10px;
       text-align:center;
     }
 
@@ -239,7 +256,6 @@
       padding:6px;
       display:flex;
       gap:8px;
-      flex-shrink:0;
       background:#f8f8f8;
     }
 
@@ -251,7 +267,6 @@
       border:none;
       font-family:'VT323', monospace;
       font-size:24px;
-      cursor:pointer;
     }
 
     .week-row{
@@ -266,7 +281,7 @@
       height:34px;
       border:3px solid #111;
       background:#f8f8f8;
-      font-size:20px;
+      font-size:19px;
       display:flex;
       justify-content:center;
       align-items:center;
@@ -292,7 +307,6 @@
     .buttons{
       margin-top:22px;
       display:flex;
-      justify-content:space-between;
       gap:8px;
     }
 
@@ -305,7 +319,6 @@
       font-family:'VT323', monospace;
       font-size:24px;
       box-shadow:0 4px 0 #333;
-      cursor:pointer;
     }
 
     button:active{
@@ -321,17 +334,22 @@
 
   <div class="screen off" id="screen">
     <div class="status-bar" id="statusBar">POWER OFF</div>
+
     <div class="play-area" id="playArea">
-      <button class="power-btn" onclick="powerOn()">POWER</button>
+      <button class="power-quote" onclick="powerOn()">
+        “The minute that we change our minds and stop giving power to the past, the past with its mistakes loses its power over us.”
+        <span class="power-author">— Psycho-Cybernetics</span>
+      </button>
     </div>
   </div>
 
   <div class="week-row">
-    <div class="day" id="day0">MON</div>
-    <div class="day" id="day1">TUE</div>
-    <div class="day" id="day2">WED</div>
-    <div class="day" id="day3">THU</div>
-    <div class="day" id="day4">FRI</div>
+    <div class="day" id="day0">SUN</div>
+    <div class="day" id="day1">MON</div>
+    <div class="day" id="day2">TUE</div>
+    <div class="day" id="day3">WED</div>
+    <div class="day" id="day4">THU</div>
+    <div class="day" id="day5">FRI</div>
   </div>
 
   <div class="buttons">
@@ -343,56 +361,65 @@
 </div>
 
 <script>
-const vows=[
-  "MAX CONTRACTS 5",
+
+const weekdayVows=[
   "LOCK RISK SETTINGS",
   "RECORD EVERY SESSION",
+  "MAX CONTRACTS 5",
   "DON'T TRADE OUTSIDE ROUTINE",
   "DON'T SIZE UP AFTER A LOSS",
   "JOURNAL BOTH ACCOUNTS",
-  "DON'T GET EMOTIONAL"
+  "IF STOP HIT, NO TRADING SECOND ACCOUNT",
+  "DRILLS"
+];
+
+const sundayVows=[
+  "LOCK BOTH ACCOUNTS",
+  "DRILLS"
 ];
 
 const damageStates=[
-  "TRADED OVER 5 CONTRACTS",
-  "RISK SETTINGS NOT LOCKED",
-  "UNRECORDED SESSION",
-  "TRADED OUTSIDE ROUTINE",
-  "SIZED UP AFTER A LOSS",
-  "SECOND ACCOUNT TRADED AFTER FIRST STOP",
-  "JOURNAL ABANDONED",
   "SPIRALED AFTER LOSS",
+  "TRADED OUTSIDE ROUTINE",
+  "RISK SETTINGS REMOVED",
   "BOUGHT / RESET COMBINE"
 ];
 
 const codeNotes=[
   "CONSIDER STOPPING AT -250.",
-  "DON'T TRADE SECOND ACCOUNT IF FIRST ACCOUNT IS STOPPED OUT.",
-  "CAREFUL FOR MANIPULATION, KNIVES, SUDDEN REVERSALS, AND PRICE COMING CLOSE TO YOUR STOP.",
-  "DON'T RELY ON STOPS. STAY ALERT!",
-  "SLOWER IS QUICKER AFTER A LOSS.",
-  "A GOOD DAY MEANS INTEGRITY WAS PRESERVED.",
-  "TRADING DOES NOT END WHEN TOPSTEP CLOSES. PROTECT THE REST OF THE DAY."
+  "LOOK FOR CHOP AND MANIPULATION.",
+  "DON'T RELY ON STOPS. STAY ALERT.",
+  "SESSION WILL END QUICKLY. BE MINDFUL.",
+  "MANAGE MOODS OUTSIDE OF TRADING.",
+  "YOU ARE ALL THAT STANDS BETWEEN A PROFITABLE ACCOUNT AND THE MARKET.",
+  "WHAT IF IT WORKS OUT?",
+  "I AM DETERMINED TO HAVE A GOOD DAY REGARDLESS OF WHAT HAPPENS.",
+  "BE GRATEFUL. SHOW REVERENCE FOR EVERY COMBINE."
 ];
 
-const days=["MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY"];
+const days=["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY"];
 
 let todayIndex=getTradingDayIndex();
 let weekKey=getWeekKey();
 let state=loadState();
 
 let moveTimer=null;
-let blinkTimer=null;
 let petStep=0;
 let poweredOn=false;
 
 const petPositions=[50,40,32,32,44,58,66,66,54,50];
 const sounds={};
 
+function getTodaysVows(){
+  if(todayIndex===0) return sundayVows;
+  return weekdayVows;
+}
+
 function makeToneWav(freq=440,duration=.1,volume=.7){
   const sampleRate=22050;
   const samples=Math.floor(sampleRate*duration);
   const dataSize=samples*2;
+
   const buffer=new ArrayBuffer(44+dataSize);
   const view=new DataView(buffer);
 
@@ -419,133 +446,202 @@ function makeToneWav(freq=440,duration=.1,volume=.7){
   for(let i=0;i<samples;i++){
     const t=i/sampleRate;
     const square=Math.sin(2*Math.PI*freq*t)>=0?1:-1;
-    const fadeOut=1-(i/samples);
-    const fadeIn=Math.min(1,i/(sampleRate*.01));
-    const env=fadeOut*fadeIn;
-    const sample=square*volume*env*32767;
+    const fade=1-(i/samples);
+    const sample=square*volume*fade*32767;
     view.setInt16(44+i*2,sample,true);
   }
 
   let binary="";
   const bytes=new Uint8Array(buffer);
-  const chunkSize=8192;
 
-  for(let i=0;i<bytes.length;i+=chunkSize){
-    const chunk=bytes.subarray(i,i+chunkSize);
-    binary+=String.fromCharCode.apply(null,chunk);
+  for(let i=0;i<bytes.length;i++){
+    binary+=String.fromCharCode(bytes[i]);
   }
 
   return "data:audio/wav;base64,"+btoa(binary);
 }
 
 function buildSounds(){
-  sounds.power=new Audio(makeToneWav(130,.08,.8));
-  sounds.menu=new Audio(makeToneWav(500,.09,.75));
-  sounds.tick=new Audio(makeToneWav(720,.045,.7));
-  sounds.fail=new Audio(makeToneWav(170,.26,.8));
-  sounds.reset=new Audio(makeToneWav(220,.18,.75));
+  sounds.tick=new Audio(makeToneWav(720,.04,.7));
+  sounds.menu=new Audio(makeToneWav(500,.08,.7));
+  sounds.fail=new Audio(makeToneWav(180,.25,.8));
+  sounds.reset=new Audio(makeToneWav(220,.18,.7));
 
-  sounds.boot1=new Audio(makeToneWav(196,.09,.85));
-  sounds.boot2=new Audio(makeToneWav(294,.10,.85));
-  sounds.boot3=new Audio(makeToneWav(392,.11,.85));
+  sounds.boot1=new Audio(makeToneWav(196,.09,.8));
+  sounds.boot2=new Audio(makeToneWav(294,.1,.8));
+  sounds.boot3=new Audio(makeToneWav(392,.1,.85));
   sounds.boot4=new Audio(makeToneWav(523,.15,.9));
 
-  sounds.victory1=new Audio(makeToneWav(523,.13,.8));
-  sounds.victory2=new Audio(makeToneWav(659,.13,.8));
-  sounds.victory3=new Audio(makeToneWav(784,.24,.85));
-
-  for(const key in sounds){
-    sounds[key].preload="auto";
-    sounds[key].playsInline=true;
-  }
+  sounds.good1=new Audio(makeToneWav(523,.12,.8));
+  sounds.good2=new Audio(makeToneWav(659,.12,.8));
+  sounds.good3=new Audio(makeToneWav(784,.22,.85));
 }
 
-function playSound(name){
+function play(name){
   if(!sounds[name]) return;
-  const s=sounds[name].cloneNode();
-  s.volume=1;
+  let s=sounds[name].cloneNode();
   s.play().catch(()=>{});
-}
-
-function playBoot(){
-  playSound("power");
-  setTimeout(()=>playSound("boot1"),90);
-  setTimeout(()=>playSound("boot2"),210);
-  setTimeout(()=>playSound("boot3"),340);
-  setTimeout(()=>playSound("boot4"),500);
-}
-
-function playMenu(){ playSound("menu"); }
-function playTick(){ playSound("tick"); }
-function playFailure(){ playSound("fail"); }
-function playReset(){ playSound("reset"); }
-
-function playVictory(){
-  playSound("victory1");
-  setTimeout(()=>playSound("victory2"),150);
-  setTimeout(()=>playSound("victory3"),300);
 }
 
 function getTradingDayIndex(){
   let d=new Date().getDay();
-  if(d===0 || d===6) return -1;
-  return d-1;
+
+  if(d===6) return -1; // Saturday rest day
+
+  if(d===0) return 0;  // Sunday
+  if(d>=1 && d<=5) return d; // Monday-Friday
+
+  return -1;
 }
 
 function getWeekKey(){
   let now=new Date();
   let day=now.getDay();
-  let diff=now.getDate()-day+(day===0?-6:1);
-  let monday=new Date(now.setDate(diff));
-  return monday.toISOString().slice(0,10);
+  let diff=now.getDate()-day;
+  let sunday=new Date(now.setDate(diff));
+  return sunday.toISOString().slice(0,10);
 }
 
 function freshState(){
   return{
     weekKey:weekKey,
-    statuses:["inactive","inactive","inactive","inactive","inactive"],
-    vows:Array.from({length:5},()=>Array(vows.length).fill(false)),
-    damage:Array.from({length:5},()=>Array(damageStates.length).fill(false))
+    statuses:["inactive","inactive","inactive","inactive","inactive","inactive"],
+    sundayVows:Array(sundayVows.length).fill(false),
+    weekdayVows:Array.from({length:6},()=>Array(weekdayVows.length).fill(false)),
+    damage:Array.from({length:6},()=>Array(damageStates.length).fill(false))
   };
 }
 
 function loadState(){
-  let saved=localStorage.getItem("kaizenKnightV3");
+  let saved=localStorage.getItem("kaizenKnightV5");
+
   if(!saved) return freshState();
 
   try{
     let parsed=JSON.parse(saved);
-    if(parsed.weekKey!==weekKey) return freshState();
 
-    if(!parsed.vows || parsed.vows[0].length!==vows.length) return freshState();
-    if(!parsed.damage || parsed.damage[0].length!==damageStates.length) return freshState();
+    if(parsed.weekKey!==weekKey){
+      return freshState();
+    }
+
+    if(!parsed.sundayVows || parsed.sundayVows.length!==sundayVows.length){
+      return freshState();
+    }
+
+    if(!parsed.weekdayVows || parsed.weekdayVows[1].length!==weekdayVows.length){
+      return freshState();
+    }
+
+    if(!parsed.damage || parsed.damage[0].length!==damageStates.length){
+      return freshState();
+    }
 
     return parsed;
+
   }catch(e){
     return freshState();
   }
 }
 
 function saveState(){
-  localStorage.setItem("kaizenKnightV3",JSON.stringify(state));
+  localStorage.setItem("kaizenKnightV5",JSON.stringify(state));
 }
 
-function powerOn(){
-  if(poweredOn) return;
-  poweredOn=true;
-  playBoot();
-  showBoot();
+function getVowStateForToday(){
+  if(todayIndex===0) return state.sundayVows;
+  return state.weekdayVows[todayIndex];
+}
+
+function getPetImage(type){
+  if(type==="king") return "king.png";
+  if(type==="rook") return "rook.png";
+  if(type==="angel") return "angel.png";
+  return "knight.png";
+}
+
+function petHTML(type="knight"){
+  return `
+    <div class="pet-zone">
+      <div class="pet-walker left" id="petWalker">
+        <div class="pet-bob">
+          <img class="pet-img"
+               id="petImg"
+               src="${getPetImage(type)}"
+               data-pet-type="${type}">
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function stopPet(){
+  clearInterval(moveTimer);
+}
+
+function startPet(delay=0){
+
+  stopPet();
+
+  setTimeout(()=>{
+
+    const walker=document.getElementById("petWalker");
+    const pet=document.getElementById("petImg");
+
+    if(!walker || !pet) return;
+
+    petStep=0;
+    walker.style.left=petPositions[petStep]+"%";
+
+    moveTimer=setInterval(()=>{
+
+      const current=petPositions[petStep];
+      petStep=(petStep+1)%petPositions.length;
+      const next=petPositions[petStep];
+
+      if(next>current){
+        walker.className="pet-walker right";
+        pet.src=getPetImage(pet.dataset.petType);
+      }
+      else if(next<current){
+        walker.className="pet-walker left";
+        pet.src=getPetImage(pet.dataset.petType);
+      }
+      else{
+        if(pet.dataset.petType==="knight"){
+          pet.src="blink.png";
+        }
+      }
+
+      walker.style.left=next+"%";
+
+    },1200);
+
+  },delay);
 }
 
 function renderDays(){
-  for(let i=0;i<5;i++){
+
+  for(let i=0;i<6;i++){
+
     let el=document.getElementById("day"+i);
+
     el.className="day";
 
-    if(state.statuses[i]==="complete") el.classList.add("complete");
-    if(state.statuses[i]==="failed") el.classList.add("failed");
-    if(state.statuses[i]==="inactive") el.classList.add("inactive");
-    if(i===todayIndex) el.classList.add("today");
+    if(state.statuses[i]==="complete"){
+      el.classList.add("complete");
+    }
+
+    if(state.statuses[i]==="failed"){
+      el.classList.add("failed");
+    }
+
+    if(state.statuses[i]==="inactive"){
+      el.classList.add("inactive");
+    }
+
+    if(i===todayIndex){
+      el.classList.add("today");
+    }
   }
 }
 
@@ -557,92 +653,34 @@ function failedCount(){
   return state.statuses.filter(s=>s==="failed").length;
 }
 
-function allVowsKept(dayIndex){
-  return state.vows[dayIndex].every(Boolean);
-}
-
 function perfectWeek(){
-  return cleanCount()===5 && failedCount()===0;
+  return cleanCount()===6 && failedCount()===0;
 }
 
-function getPetImage(type){
-  if(type==="king") return "king.png";
-  if(type==="rook") return "rook.png";
-  if(type==="angel") return "angel.png";
-  return "knight.png";
-}
+function powerOn(){
 
-function petHTML(type="knight"){
-  const src=getPetImage(type);
-  const canBlink=type==="knight";
+  if(poweredOn) return;
 
-  return `
-    <div class="pet-zone">
-      <div class="pet-walker left" id="petWalker">
-        <div class="pet-bob">
-          <img class="pet-img" id="petImg"
-               src="${src}"
-               data-pet-type="${type}"
-               data-can-blink="${canBlink}"
-               alt="Kaizen Knight">
-        </div>
-      </div>
-    </div>
-  `;
-}
+  poweredOn=true;
 
-function stopPet(){
-  clearInterval(moveTimer);
-  clearInterval(blinkTimer);
-}
+  play("boot1");
+  setTimeout(()=>play("boot2"),150);
+  setTimeout(()=>play("boot3"),320);
+  setTimeout(()=>play("boot4"),500);
 
-function startBlink(){
-  // Blink is synced to the movement cycle inside startPet().
-  // No independent blink timer is used.
-}
-
-function startPet(delay=0){
-  stopPet();
-
-  setTimeout(()=>{
-    const walker=document.getElementById("petWalker");
-    const pet=document.getElementById("petImg");
-    if(!walker || !pet) return;
-
-    petStep=0;
-    walker.style.left=petPositions[petStep]+"%";
-    pet.src=getPetImage(pet.dataset.petType);
-
-    moveTimer=setInterval(()=>{
-      const current=petPositions[petStep];
-      petStep=(petStep+1)%petPositions.length;
-      const next=petPositions[petStep];
-
-      if(next>current){
-        walker.className="pet-walker right";
-        pet.src=getPetImage(pet.dataset.petType);
-      }else if(next<current){
-        walker.className="pet-walker left";
-        pet.src=getPetImage(pet.dataset.petType);
-      }else{
-        if(pet.dataset.canBlink==="true"){
-          pet.src="blink.png";
-        }
-      }
-
-      walker.style.left=next+"%";
-    },1200);
-
-  },delay);
+  showBoot();
 }
 
 function showBoot(){
-  stopPet();
+
   renderDays();
 
   document.getElementById("screen").className="screen boot-dark";
+
   document.getElementById("statusBar").innerHTML="POWER";
-  document.getElementById("playArea").innerHTML="<div class='boot-text'>BOOTING...</div>";
+
+  document.getElementById("playArea").innerHTML=
+    "<div class='boot-text'>BOOTING...</div>";
 
   setTimeout(()=>{
     document.getElementById("statusBar").innerHTML="KAIZEN KNIGHT";
@@ -654,24 +692,7 @@ function showBoot(){
   },1200);
 }
 
-function currentDayText(){
-  let now=new Date();
-
-  let timeString=now.toLocaleTimeString([],{
-    hour:'2-digit',
-    minute:'2-digit'
-  });
-
-  let dateString=now.toLocaleDateString([],{
-    month:'short',
-    day:'numeric'
-  });
-
-  return {dateString,timeString};
-}
-
 function showMain(fromBoot=false){
-  if(!poweredOn) return;
 
   stopPet();
   renderDays();
@@ -679,72 +700,69 @@ function showMain(fromBoot=false){
   document.getElementById("screen").className="screen";
   document.getElementById("statusBar").innerHTML="KAIZEN KNIGHT";
 
-  let dt=currentDayText();
+  let date=new Date();
 
-  if(todayIndex<0){
-    document.getElementById("playArea").innerHTML=
-      petHTML("knight")+
-      "<div class='ground'></div>"+
-      "<div class='textbox'>"+
-      dt.dateString+" • "+dt.timeString+
-      "<br>WEEKEND / REST DAY"+
-      "<br><span class='subline'>CLEAN DAYS: "+cleanCount()+"/5</span>"+
-      "</div>";
+  let dateString=date.toLocaleDateString([],{
+    month:'short',
+    day:'numeric'
+  });
 
-    startPet(fromBoot ? 650 : 0);
-    return;
-  }
-
-  let status=state.statuses[todayIndex];
-  let text="STEADY";
+  let status="REST DAY";
   let petType="knight";
 
-  if(status==="complete"){
-    text="DAY SEALED CLEAN";
-    petType=perfectWeek() ? "angel" : "king";
-  }
+  if(todayIndex>=0){
 
-  if(status==="failed"){
-    text="INTEGRITY DAMAGED";
-    petType="rook";
+    status="STEADY";
+
+    if(state.statuses[todayIndex]==="complete"){
+      status="DAY SEALED CLEAN";
+      petType=perfectWeek() ? "angel" : "king";
+    }
+
+    if(state.statuses[todayIndex]==="failed"){
+      status="INTEGRITY DAMAGED";
+      petType="rook";
+    }
   }
 
   document.getElementById("playArea").innerHTML=
     petHTML(petType)+
     "<div class='ground'></div>"+
     "<div class='textbox'>"+
-    dt.dateString+" • "+days[todayIndex]+
-    "<br>STATUS: "+text+
-    "<br><span class='subline'>CLEAN DAYS: "+cleanCount()+"/5</span>"+
+    dateString+
+    "<br>"+status+
+    "<br><span class='subline'>CLEAN DAYS: "+cleanCount()+"/6</span>"+
     "</div>";
 
   startPet(fromBoot ? 650 : 0);
 }
 
 function showCheck(){
-  if(!poweredOn) return;
-
-  stopPet();
 
   if(todayIndex<0){
     showMain();
     return;
   }
 
-  playMenu();
+  play("menu");
+  stopPet();
+
+  let todaysVows=getTodaysVows();
+  let vowState=getVowStateForToday();
 
   let html="";
   html+="<div class='panel'>";
-  html+="<div class='panel-title'>CHECK</div>";
-  html+="<div class='scroll' id='checkScroll'>";
+  html+="<div class='panel-title'>"+days[todayIndex]+" CHECK</div>";
+  html+="<div class='scroll'>";
 
   html+="<div class='section-label'>VOWS</div>";
   html+="<div class='small-note'>CHECK WHAT HELD TRUE TODAY</div>";
 
-  for(let i=0;i<vows.length;i++){
+  for(let i=0;i<todaysVows.length;i++){
+
     html+="<div class='rule'>";
-    html+="<div class='box "+(state.vows[todayIndex][i]?"checked":"")+"' id='vow"+i+"' onclick='toggleVow("+i+")'></div>";
-    html+="<div>"+vows[i]+"</div>";
+    html+="<div class='box "+(vowState[i]?"checked":"")+"' onclick='toggleVow("+i+")'></div>";
+    html+="<div>"+todaysVows[i]+"</div>";
     html+="</div>";
   }
 
@@ -752,27 +770,29 @@ function showCheck(){
   html+="<div class='small-note'>ONLY MARK IF CONTAINMENT BROKE</div>";
 
   for(let i=0;i<damageStates.length;i++){
-    html+="<div class='rule damage'>";
-    html+="<div class='box "+(state.damage[todayIndex][i]?"checked":"")+"' id='damage"+i+"' onclick='toggleDamage("+i+")'></div>";
+
+    html+="<div class='rule'>";
+    html+="<div class='box "+(state.damage[todayIndex][i]?"checked":"")+"' onclick='toggleDamage("+i+")'></div>";
     html+="<div>"+damageStates[i]+"</div>";
     html+="</div>";
   }
 
   html+="</div>";
+
   html+="<div class='panel-buttons'>";
-  html+="<button class='mini-btn' onclick='lockInDay()'>LOCK</button>";
+  html+="<button class='mini-btn' onclick='lockDay()'>LOCK</button>";
   html+="<button class='mini-btn' onclick='showMain()'>BACK</button>";
   html+="</div>";
+
   html+="</div>";
 
   document.getElementById("playArea").innerHTML=html;
 }
 
 function showCode(){
-  if(!poweredOn) return;
 
+  play("menu");
   stopPet();
-  playMenu();
 
   let html="";
   html+="<div class='panel'>";
@@ -784,82 +804,103 @@ function showCode(){
   }
 
   html+="</div>";
+
   html+="<div class='panel-buttons'>";
   html+="<button class='mini-btn' onclick='showMain()'>BACK</button>";
   html+="</div>";
+
   html+="</div>";
 
   document.getElementById("playArea").innerHTML=html;
 }
 
-function toggleVow(index){
-  state.vows[todayIndex][index]=!state.vows[todayIndex][index];
+function toggleVow(i){
+
+  let vowState=getVowStateForToday();
+
+  vowState[i]=!vowState[i];
+
   saveState();
+  play("tick");
 
-  let box=document.getElementById("vow"+index);
-  if(box) box.classList.toggle("checked",state.vows[todayIndex][index]);
-
-  playTick();
+  showCheck();
 }
 
-function toggleDamage(index){
-  state.damage[todayIndex][index]=!state.damage[todayIndex][index];
+function toggleDamage(i){
+
+  state.damage[todayIndex][i]=!state.damage[todayIndex][i];
+
   saveState();
+  play("tick");
 
-  let box=document.getElementById("damage"+index);
-  if(box) box.classList.toggle("checked",state.damage[todayIndex][index]);
-
-  playTick();
+  showCheck();
 }
 
-function lockInDay(){
-  if(!poweredOn || todayIndex<0) return;
+function lockDay(){
 
   stopPet();
 
-  let vowsKept=state.vows[todayIndex].filter(Boolean).length;
-  let damageCount=state.damage[todayIndex].filter(Boolean).length;
+  let passed=true;
+  let vowState=getVowStateForToday();
 
-  let passed=allVowsKept(todayIndex) && damageCount===0;
+  for(let i=0;i<vowState.length;i++){
+    if(!vowState[i]){
+      passed=false;
+    }
+  }
 
-  state.statuses[todayIndex]=passed?"complete":"failed";
+  for(let i=0;i<damageStates.length;i++){
+    if(state.damage[todayIndex][i]){
+      passed=false;
+    }
+  }
+
+  state.statuses[todayIndex]=passed ? "complete" : "failed";
+
   saveState();
 
   if(passed){
-    playVictory();
-  }else{
-    playFailure();
+    play("good1");
+    setTimeout(()=>play("good2"),160);
+    setTimeout(()=>play("good3"),320);
+  }
+  else{
+    play("fail");
   }
 
+  renderDays();
+
   let petType=passed ? "king" : "rook";
-  if(passed && cleanCount()===5) petType="angel";
+
+  if(passed && perfectWeek()){
+    petType="angel";
+  }
 
   document.getElementById("playArea").innerHTML=
     petHTML(petType)+
     "<div class='ground'></div>"+
     "<div class='textbox'>"+
-    "DAY SEALED<br>"+
-    vowsKept+"/"+vows.length+" VOWS KEPT<br>"+
-    (passed ? "INTEGRITY PRESERVED" : "INTEGRITY DAMAGED")+
+    "DAY SEALED"+
+    "<br>"+(passed ? "INTEGRITY PRESERVED" : "INTEGRITY DAMAGED")+
     "</div>";
 
-  renderDays();
   startPet();
 }
 
 function resetWeek(){
-  if(!poweredOn) return;
 
-  stopPet();
+  play("reset");
 
-  playReset();
   state=freshState();
+
   saveState();
+
   showMain();
 }
 
 buildSounds();
 renderDays();
+
 </script>
 
 </body>
