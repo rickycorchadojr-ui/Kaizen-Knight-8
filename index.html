@@ -32,7 +32,7 @@
     .pet-walker{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);}
     .pet-bob{animation:bob 1.2s infinite steps(2);position:relative;width:160px;height:160px;}
     .pet-img{width:160px;height:160px;display:block;image-rendering:pixelated;image-rendering:crisp-edges;object-fit:contain;opacity:.92;filter:grayscale(1) contrast(2) brightness(.55);}
-    .pet-img.angel-img{filter:none;opacity:1;}
+    .pet-img.clean-img{filter:none;opacity:1;}
     .firework-img{width:160px;height:160px;position:absolute;left:0;top:0;display:none;image-rendering:pixelated;image-rendering:crisp-edges;object-fit:contain;pointer-events:none;z-index:3;}
     .pet-walker.right .pet-img{transform:scaleX(-1);}
     .pet-walker.left .pet-img{transform:scaleX(1);}
@@ -215,6 +215,12 @@ function play(name){
   s.play().catch(()=>{});
 }
 
+function playGoodSeal(){
+  play("good1");
+  setTimeout(()=>play("good2"),160);
+  setTimeout(()=>play("good3"),320);
+}
+
 function getTradingDayIndex(){
   let d=new Date().getDay();
   if(d===6) return -1;
@@ -235,6 +241,7 @@ function freshState(){
   return{
     weekKey:weekKey,
     streak:0,
+    finalForm:null,
     statuses:["inactive","inactive","inactive","inactive","inactive","inactive"],
     sundayVows:Array(sundayVows.length).fill(false),
     weekdayVows:Array.from({length:6},()=>Array(weekdayVows.length).fill(false)),
@@ -259,6 +266,7 @@ function loadState(){
     if(!parsed.weekdayVows || parsed.weekdayVows[1].length!==weekdayVows.length) return freshState();
     if(!parsed.damage || parsed.damage[0].length!==damageStates.length) return freshState();
     if(typeof parsed.streak!=="number") parsed.streak=cleanCountFromStatuses(parsed.statuses);
+    if(typeof parsed.finalForm==="undefined") parsed.finalForm=null;
 
     return parsed;
   }catch(e){
@@ -284,11 +292,31 @@ function getPetImage(type){
   if(type==="king") return "king.png";
   if(type==="rook") return "rook.png";
   if(type==="angel") return "angel.png";
+  if(type==="red") return "red.png";
+  if(type==="orange") return "orange.png";
+  if(type==="yellow") return "yellow.png";
+  if(type==="green") return "green.png";
+  if(type==="blue") return "blue.png";
+  if(type==="purple") return "purple.png";
+  if(type==="black") return "black.png";
+  if(type==="brown") return "brown.png";
   return "knight.png";
 }
 
+function isCleanSprite(type){
+  return type==="angel" ||
+         type==="red" ||
+         type==="orange" ||
+         type==="yellow" ||
+         type==="green" ||
+         type==="blue" ||
+         type==="purple" ||
+         type==="black" ||
+         type==="brown";
+}
+
 function getPetClass(type){
-  if(type==="angel") return "pet-img angel-img";
+  if(isCleanSprite(type)) return "pet-img clean-img";
   return "pet-img";
 }
 
@@ -407,6 +435,42 @@ function perfectWeek(){
   return cleanCount()===6 && failedCount()===0;
 }
 
+function weeklyVowPercent(){
+  let checked=0;
+  let total=0;
+
+  for(let i=0;i<sundayVows.length;i++){
+    total++;
+    if(state.sundayVows[i]) checked++;
+  }
+
+  for(let d=1;d<=5;d++){
+    for(let i=0;i<weekdayVows.length;i++){
+      total++;
+      if(state.weekdayVows[d][i]) checked++;
+    }
+  }
+
+  if(total<=0) return 0;
+  return Math.floor((checked/total)*100);
+}
+
+function formFromWeeklyPercent(percent){
+  if(percent>=90) return "red";
+  if(percent>=80) return "orange";
+  if(percent>=70) return "yellow";
+  if(percent>=60) return "green";
+  if(percent>=50) return "blue";
+  if(percent>=40) return "purple";
+  if(percent>=30) return "black";
+  if(percent>=20) return "brown";
+  return null;
+}
+
+function shouldShowFinalForm(){
+  return state.finalForm && (todayIndex===5 || todayIndex===-1);
+}
+
 function powerOn(){
   if(poweredOn) return;
   poweredOn=true;
@@ -448,12 +512,15 @@ function showMain(fromBoot=false){
   let status="REST DAY";
   let petType="knight";
 
-  if(todayIndex>=0){
+  if(shouldShowFinalForm()){
+    petType=state.finalForm;
+    status=state.finalForm==="angel" ? "PERFECT WEEK" : "WEEK FORM";
+  }else if(todayIndex>=0){
     status="STEADY";
 
     if(state.statuses[todayIndex]==="complete"){
       status="DAY SEALED CLEAN";
-      petType=perfectWeek() ? "angel" : "king";
+      petType="king";
     }
 
     if(state.statuses[todayIndex]==="failed"){
@@ -614,16 +681,27 @@ function lockDay(){
     state.streak=0;
   }
 
-  saveState();
-
   let shouldPlayFirework=passed && todayIndex===5 && perfectWeek();
+  let weeklyForm=null;
+
+  if(todayIndex===5){
+    if(shouldPlayFirework){
+      weeklyForm="angel";
+    }else{
+      weeklyForm=formFromWeeklyPercent(weeklyVowPercent());
+    }
+
+    state.finalForm=weeklyForm;
+  }
+
+  saveState();
 
   if(shouldPlayFirework){
     play("perfectWeek");
+  }else if(todayIndex===5 && weeklyForm){
+    playGoodSeal();
   }else if(passed){
-    play("good1");
-    setTimeout(()=>play("good2"),160);
-    setTimeout(()=>play("good3"),320);
+    playGoodSeal();
   }else{
     play("fail");
   }
@@ -631,7 +709,10 @@ function lockDay(){
   renderDays();
 
   let petType=passed ? "king" : "rook";
-  if(passed && perfectWeek()) petType="angel";
+
+  if(todayIndex===5 && weeklyForm){
+    petType=weeklyForm;
+  }
 
   let sealText="DAY SEALED";
   let resultText=passed ? "INTEGRITY PRESERVED" : "INTEGRITY DAMAGED";
@@ -639,6 +720,9 @@ function lockDay(){
   if(shouldPlayFirework){
     sealText="PERFECT WEEK!";
     resultText="INTEGRITY PRESERVED";
+  }else if(todayIndex===5 && weeklyForm){
+    sealText="WEEK FORM";
+    resultText=weeklyVowPercent()+"% VOWS KEPT";
   }
 
   document.getElementById("playArea").innerHTML=
