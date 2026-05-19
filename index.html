@@ -32,6 +32,7 @@
     .pet-walker{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);}
     .pet-bob{animation:bob 1.2s infinite steps(2);position:relative;width:160px;height:160px;}
     .pet-img{width:160px;height:160px;display:block;image-rendering:pixelated;image-rendering:crisp-edges;object-fit:contain;opacity:.92;filter:grayscale(1) contrast(2) brightness(.55);}
+    .pet-img.angel-img{filter:none;opacity:1;}
     .firework-img{width:160px;height:160px;position:absolute;left:0;top:0;display:none;image-rendering:pixelated;image-rendering:crisp-edges;object-fit:contain;pointer-events:none;z-index:3;}
     .pet-walker.right .pet-img{transform:scaleX(-1);}
     .pet-walker.left .pet-img{transform:scaleX(1);}
@@ -142,6 +143,10 @@ let fireworkFrame=1;
 
 const petPositions=[50,40,32,32,44,58,66,66,54,50];
 const sounds={};
+
+function requirePower(){
+  return poweredOn;
+}
 
 function getTodaysVows(){
   if(todayIndex===0) return sundayVows;
@@ -282,6 +287,11 @@ function getPetImage(type){
   return "knight.png";
 }
 
+function getPetClass(type){
+  if(type==="angel") return "pet-img angel-img";
+  return "pet-img";
+}
+
 function streakHTML(){
   return "<div class='streak-counter'>"+state.streak+"</div>";
 }
@@ -291,7 +301,7 @@ function petHTML(type="knight"){
     <div class="pet-zone">
       <div class="pet-walker left" id="petWalker">
         <div class="pet-bob">
-          <img class="pet-img" id="petImg" src="${getPetImage(type)}" data-pet-type="${type}">
+          <img class="${getPetClass(type)}" id="petImg" src="${getPetImage(type)}" data-pet-type="${type}">
           <img class="firework-img" id="fireworkImg" src="Firework1.png">
         </div>
       </div>
@@ -425,6 +435,8 @@ function showBoot(){
 }
 
 function showMain(fromBoot=false){
+  if(!requirePower()) return;
+
   stopPet();
   stopFirework();
   renderDays();
@@ -464,6 +476,8 @@ function showMain(fromBoot=false){
 }
 
 function showCheck(restoreScroll=null){
+  if(!requirePower()) return;
+
   if(todayIndex<0){
     showMain();
     return;
@@ -516,11 +530,15 @@ function showCheck(restoreScroll=null){
 }
 
 function showCheckWithMenuSound(){
+  if(!requirePower()) return;
+
   play("menu");
   showCheck();
 }
 
 function showCode(){
+  if(!requirePower()) return;
+
   play("menu");
   stopPet();
   stopFirework();
@@ -549,6 +567,8 @@ function getCheckScrollTop(){
 }
 
 function toggleVow(i){
+  if(!requirePower()) return;
+
   let scrollTop=getCheckScrollTop();
   let vowState=getVowStateForToday();
   vowState[i]=!vowState[i];
@@ -559,6 +579,8 @@ function toggleVow(i){
 }
 
 function toggleDamage(i){
+  if(!requirePower()) return;
+
   let scrollTop=getCheckScrollTop();
   state.damage[todayIndex][i]=!state.damage[todayIndex][i];
 
@@ -568,6 +590,8 @@ function toggleDamage(i){
 }
 
 function lockDay(){
+  if(!requirePower()) return;
+
   stopPet();
   stopFirework();
 
@@ -634,6 +658,8 @@ function lockDay(){
 }
 
 function resetWeek(){
+  if(!requirePower()) return;
+
   play("reset");
   stopFirework();
 
