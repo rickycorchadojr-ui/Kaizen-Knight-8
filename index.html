@@ -84,7 +84,7 @@
   </div>
 
   <div class="buttons">
-    <button onclick="showCheck()">CHECK</button>
+    <button onclick="showCheckWithMenuSound()">CHECK</button>
     <button onclick="showCode()">CODE</button>
     <button onclick="resetWeek()">RESET</button>
   </div>
@@ -200,6 +200,7 @@ function buildSounds(){
   sounds.good2=new Audio(makeToneWav(659,.12,.8));
   sounds.good3=new Audio(makeToneWav(784,.22,.85));
   sounds.firework=new Audio("8d82b5_Super_Mario_Bros_Fireworks_Sound_Effect.mp3");
+  sounds.perfectWeek=new Audio("fever-stage-clear (online-video-cutter.com).mp3");
 }
 
 function play(name){
@@ -566,7 +567,9 @@ function lockDay(){
 
   let shouldPlayFirework=passed && todayIndex===5 && perfectWeek();
 
-  if(passed){
+  if(shouldPlayFirework){
+    play("perfectWeek");
+  }else if(passed){
     play("good1");
     setTimeout(()=>play("good2"),160);
     setTimeout(()=>play("good3"),320);
@@ -612,10 +615,6 @@ function resetWeek(){
 
 buildSounds();
 renderDays();
-</script>
-
-<script>
-document.querySelector("button[onclick='showCheck()']").setAttribute("onclick","showCheckWithMenuSound()");
 </script>
 
 </body>
