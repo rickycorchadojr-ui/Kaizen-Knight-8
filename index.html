@@ -61,14 +61,97 @@
 
     .gallery-wrap{width:100%;height:100%;display:flex;flex-direction:column;background:#f8f8f8;}
     .gallery-title{text-align:center;font-size:25px;padding:5px;border-bottom:4px solid #111;flex-shrink:0;}
-    .gallery-hall{flex:1;overflow-x:auto;overflow-y:hidden;white-space:nowrap;background:#e9ecd8;padding:18px 14px;box-sizing:border-box;}
-    .trophy-card{display:inline-flex;vertical-align:top;width:116px;height:188px;margin-right:12px;background:#f8f8f8;border:4px solid #111;box-sizing:border-box;flex-direction:column;justify-content:space-between;align-items:center;text-align:center;padding:10px 5px;}
-    .trophy-card.locked{opacity:.35;background:#e9ecd8;}
-    .trophy-icon{font-size:48px;line-height:1;}
-    .trophy-day{font-size:27px;line-height:.9;}
-    .trophy-date{font-size:19px;line-height:.9;min-height:34px;display:flex;align-items:center;justify-content:center;}
-    .pedestal{width:62px;height:22px;border:4px solid #111;border-top:none;margin-top:2px;}
-    .empty-trophy{font-size:48px;line-height:1;opacity:.55;}
+    .gallery-hall{
+      flex:1;
+      overflow-x:auto;
+      overflow-y:hidden;
+      white-space:nowrap;
+      background:#e9ecd8;
+      box-sizing:border-box;
+      scroll-snap-type:x mandatory;
+    }
+    .gallery-room{
+      display:inline-flex;
+      vertical-align:top;
+      width:100%;
+      height:100%;
+      box-sizing:border-box;
+      scroll-snap-align:start;
+      position:relative;
+      background:#e9ecd8;
+      border-right:4px solid #111;
+      justify-content:center;
+      align-items:flex-end;
+      padding:18px 18px 14px;
+    }
+    .gallery-room.locked{opacity:.42;}
+    .room-wall{
+      position:absolute;
+      left:16px;
+      right:16px;
+      top:16px;
+      bottom:16px;
+      border:4px solid #111;
+      background:#e9ecd8;
+      box-sizing:border-box;
+    }
+    .gallery-room.locked .room-wall{border-color:#777;}
+    .trophy-display{
+      position:relative;
+      z-index:2;
+      width:160px;
+      height:138px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-end;
+      text-align:center;
+      margin-bottom:0;
+    }
+    .trophy-icon{
+      font-size:34px;
+      line-height:1;
+      margin-bottom:4px;
+    }
+    .empty-trophy{
+      font-size:34px;
+      line-height:1;
+      margin-bottom:4px;
+      color:#777;
+    }
+    .pedestal-top{
+      width:86px;
+      height:14px;
+      border:4px solid #111;
+      border-bottom:none;
+      box-sizing:border-box;
+    }
+    .pedestal-base{
+      width:110px;
+      height:20px;
+      border:4px solid #111;
+      box-sizing:border-box;
+      margin-bottom:6px;
+    }
+    .gallery-room.locked .pedestal-top,.gallery-room.locked .pedestal-base{border-color:#777;}
+    .trophy-day{
+      font-size:27px;
+      line-height:.9;
+      background:#f8f8f8;
+      border:3px solid #111;
+      padding:3px 10px 4px;
+      margin-bottom:5px;
+      min-width:90px;
+      box-sizing:border-box;
+    }
+    .gallery-room.locked .trophy-day{border-color:#777;color:#777;background:#e9ecd8;}
+    .trophy-date{
+      font-size:18px;
+      line-height:.9;
+      min-height:18px;
+      width:150px;
+      overflow:hidden;
+    }
     .gallery-footer{font-size:19px;text-align:center;border-top:4px solid #111;padding:4px;background:#f8f8f8;}
 
     .panel-buttons{border-top:4px solid #111;padding:6px;display:flex;gap:8px;background:#f8f8f8;}
@@ -774,7 +857,9 @@ function showGallery(){
     let day=achievementDays[i];
     let earned=state.achievements && state.achievements[day];
 
-    html+="<div class='trophy-card "+(earned?"":"locked")+"'>";
+    html+="<div class='gallery-room "+(earned?"":"locked")+"'>";
+    html+="<div class='room-wall'></div>";
+    html+="<div class='trophy-display'>";
 
     if(earned){
       html+="<div class='trophy-icon'>🏆</div>";
@@ -782,9 +867,12 @@ function showGallery(){
       html+="<div class='empty-trophy'>□</div>";
     }
 
-    html+="<div class='pedestal'></div>";
+    html+="<div class='pedestal-top'></div>";
+    html+="<div class='pedestal-base'></div>";
     html+="<div class='trophy-day'>DAY "+day+"</div>";
     html+="<div class='trophy-date'>"+(earned ? earned : "")+"</div>";
+
+    html+="</div>";
     html+="</div>";
   }
 
@@ -803,7 +891,7 @@ function showGallery(){
     for(let i=0;i<achievementDays.length;i++){
       if(state.achievements && state.achievements[achievementDays[i]]) earnedCount++;
     }
-    hall.scrollLeft=Math.max(0,(earnedCount-2)*128);
+    hall.scrollLeft=Math.max(0,(earnedCount-1)*hall.clientWidth);
   }
 }
 
