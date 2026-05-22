@@ -38,6 +38,7 @@
     .pet-walker{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);}
     .pet-bob{animation:bob 1.2s infinite steps(2);position:relative;width:160px;height:160px;}
     .pet-img{width:160px;height:160px;display:block;image-rendering:pixelated;image-rendering:crisp-edges;object-fit:contain;opacity:.92;filter:grayscale(1) contrast(2) brightness(.55);}
+.santa-hat{width:160px;height:160px;position:absolute;left:0;top:0;image-rendering:pixelated;image-rendering:crisp-edges;object-fit:contain;pointer-events:none;z-index:2;}
     .pet-img.clean-img{filter:none;opacity:1;}
     .firework-img{width:160px;height:160px;position:absolute;left:0;top:0;display:none;image-rendering:pixelated;image-rendering:crisp-edges;object-fit:contain;pointer-events:none;z-index:3;}
     .sleep-overlay{width:160px;height:160px;position:absolute;left:0;top:0;display:none;image-rendering:pixelated;image-rendering:crisp-edges;object-fit:contain;pointer-events:none;z-index:4;}
@@ -190,7 +191,7 @@ function sceneBackgroundHTML(){
 }
 
 const FORCE_HALLOWEEN_TEST=false;
-const FORCE_CHRISTMAS_TEST=false;
+const FORCE_CHRISTMAS_TEST=true;
 
 function seasonalOverlayHTML(){
 
@@ -453,6 +454,17 @@ function isCleanSprite(type){
 function getPetClass(type){ return isCleanSprite(type) ? "pet-img clean-img" : "pet-img"; }
 function streakHTML(){ return "<div class='streak-counter'>"+state.streak+"</div>"; }
 function achievementHTML(){ return "<div class='achievement-banner' id='achievementBanner'></div>"; }
+function santaHatHTML(){
+  const month=new Date().getMonth();
+  const isDecember=month===11;
+
+  if(isDecember || FORCE_CHRISTMAS_TEST){
+    return "<img class='santa-hat' src='Santahat.png'>";
+  }
+
+  return "";
+}
+
 function petHTML(type="knight"){
   let img=getPetImage(type);
   if(isSleepTime() && canPetBlink(type)){
@@ -463,6 +475,7 @@ function petHTML(type="knight"){
       <div class="pet-walker left" id="petWalker">
         <div class="pet-bob">
           <img class="${getPetClass(type)}" id="petImg" src="${img}" data-pet-type="${type}">
+          ${santaHatHTML()}
           <img class="sleep-overlay" id="sleepOverlay" src="sleep1.png">
           <img class="firework-img" id="fireworkImg" src="Firework1.png">
         </div>
