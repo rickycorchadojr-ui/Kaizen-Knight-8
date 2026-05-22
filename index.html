@@ -752,9 +752,8 @@ function showMain(fromBoot=false){
   renderDays();
   ensureAchievementArchive();
   document.getElementById("screen").className="screen";
-document.getElementById("statusBar").innerHTML=status;
-  let weekText="WEEK OF "+weekKey;
-  let status="REST DAY";
+let weekText="WEEK OF "+weekKey;
+let status="REST DAY";
   let petType="knight";
   if(shouldShowFinalForm()){
     petType=state.finalForm;
@@ -770,6 +769,7 @@ document.getElementById("statusBar").innerHTML=status;
       petType="rook";
     }
   }
+document.getElementById("statusBar").innerHTML=status;
   document.getElementById("playArea").innerHTML=
     achievementHTML()+
     streakHTML()+
