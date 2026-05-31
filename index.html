@@ -292,6 +292,12 @@ const gateQuestions=[
 ];
 
 const GATE_FAIL_LIMIT=3;
+const lightSessionVows=[
+  "MAX SIZE 1",
+  "ONE ACCOUNT ONLY",
+  "NO SCALING",
+  "NO 3PM SESSION"
+];
 const recoveryVows=[
   "LOCK BOTH ACCOUNTS",
   "NO CHARTS",
@@ -327,6 +333,11 @@ const damageProtocolVows=[
   "PLAN REPAIR STEP"
 ];
 const codeNotes=[
+  "KAIZEN KNIGHT EXISTS TO PRESERVE READINESS.",
+  "INTEGRITY PROTECTS THE SYSTEM.",
+  "RECOVERY RESTORES THE SYSTEM.",
+  "FRESHNESS PRESERVES THE SYSTEM.",
+  "THE GOAL IS NOT TO WIN TODAY. THE GOAL IS TO ARRIVE TOMORROW READY AGAIN.",
   "CONSIDER STOPPING AT -250.",
   "LOOK FOR CHOP AND MANIPULATION.",
   "DON'T RELY ON STOPS. STAY ALERT.",
@@ -349,7 +360,11 @@ const manualNotes=[
 ["SPIRALED AFTER LOSS / DON'T GET EMOTIONAL","DAMAGE: LOSS CAUSED LOSS OF CONTROL. UNCHARACTERISTICALLY EMOTIONAL."],
   ["TRADED OUTSIDE ROUTINE","DAMAGE: TRADED WITHOUT RITUAL."],
   ["RISK SETTINGS REMOVED","DAMAGE: SAFETY WAS UNLOCKED."],
-  ["BOUGHT / RESET COMBINE","DAMAGE: PAID TO CONTINUE THE LOOP."]
+  ["BOUGHT / RESET COMBINE","DAMAGE: PAID TO CONTINUE THE LOOP."],
+["MAX SIZE 1","LIGHT SESSION WIN: NEVER ABOVE 1 CONTRACT. FAIL: 2+ CONTRACTS."],
+["ONE ACCOUNT ONLY","LIGHT SESSION WIN: ONLY ONE ACCOUNT USED. FAIL: SECOND ACCOUNT OPENED."],
+["NO SCALING","LIGHT SESSION WIN: SIZE STAYED FIXED. FAIL: ADDED SIZE."],
+["NO 3PM SESSION","LIGHT SESSION WIN: NO AFTERNOON RE-ENTRY. FAIL: 3PM TRADE."]
 ];
 const powerQuotes=[
   {
@@ -363,7 +378,7 @@ const powerQuotes=[
     weight:15
   }
 ];
-const APP_VERSION="7.0.3";
+const APP_VERSION="7.2.0";
 const DEBUG_MODE=false;
 const days=["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY"];
 let todayIndex=getTradingDayIndex();
@@ -879,7 +894,7 @@ const COPPER_PER_SILVER=50;
 const SILVER_PER_GOLD=10;
 
 function getVaultVows(){
-  let all=weekdayVows.concat(sundayVows).concat(growthVows);
+  let all=weekdayVows.concat(sundayVows).concat(growthVows).concat(lightSessionVows);
   return all.filter((v,i,a)=>a.indexOf(v)===i);
 }
 
@@ -932,6 +947,8 @@ gatePassed:false,
 recoveryChosen:false,
 damageProtocolActive:false,
 gateAnswers:Array(gateQuestions.length).fill(false),
+readinessScore:null,
+readinessWeather:null,
 
 streak:0,
 bestStreak:0,
@@ -950,6 +967,7 @@ statuses:["inactive","inactive","inactive","inactive","inactive","inactive"],
     weekdayVows:Array.from({length:6},()=>Array(weekdayVows.length).fill(false)),
     damage:Array.from({length:6},()=>Array(damageStates.length).fill(false)),
 growthVows:Array.from({length:6},()=>Array(growthVows.length).fill(false)),
+lightSessionVows:Array.from({length:6},()=>Array(lightSessionVows.length).fill(false)),
 recoveryVows:Array.from({length:6},()=>Array(recoveryVows.length).fill(false)),
 recoveryDamage:Array.from({length:6},()=>Array(recoveryDamageStates.length).fill(false)),
 damageProtocolVows:Array.from({length:6},()=>Array(damageProtocolVows.length).fill(false))
@@ -977,6 +995,9 @@ if(!parsed.growthVows || parsed.growthVows.length!==6 || parsed.growthVows[0].le
 }
     if(!parsed.weekdayVows || parsed.weekdayVows[1].length!==weekdayVows.length) return freshState();
     if(!parsed.damage || parsed.damage[0].length!==damageStates.length) return freshState();
+if(!parsed.lightSessionVows || parsed.lightSessionVows.length!==6 || parsed.lightSessionVows[0].length!==lightSessionVows.length){
+  parsed.lightSessionVows=Array.from({length:6},()=>Array(lightSessionVows.length).fill(false));
+}
 if(!parsed.recoveryVows || parsed.recoveryVows.length!==6 || parsed.recoveryVows[0].length!==recoveryVows.length){
   parsed.recoveryVows=Array.from({length:6},()=>Array(recoveryVows.length).fill(false));
 }
@@ -1003,6 +1024,8 @@ if(typeof parsed.damageProtocolActive==="undefined") parsed.damageProtocolActive
 if(!parsed.gateAnswers || parsed.gateAnswers.length!==gateQuestions.length){
   parsed.gateAnswers=Array(gateQuestions.length).fill(false);
 }
+if(typeof parsed.readinessScore==="undefined") parsed.readinessScore=null;
+if(typeof parsed.readinessWeather==="undefined") parsed.readinessWeather=null;
 if(!parsed.damageProtocolVows || parsed.damageProtocolVows.length!==6 || parsed.damageProtocolVows[0].length!==damageProtocolVows.length){
   parsed.damageProtocolVows=Array.from({length:6},()=>Array(damageProtocolVows.length).fill(false));
 }
@@ -1029,6 +1052,8 @@ function ensureDailyModeFresh(){
   state.recoveryChosen=false;
   state.damageProtocolActive=false;
   state.gateAnswers=Array(gateQuestions.length).fill(false);
+state.readinessScore=null;
+state.readinessWeather=null;
 state.damageProtocolVows=Array.from({length:6},()=>Array(damageProtocolVows.length).fill(false));
   saveState();
 }
@@ -1300,16 +1325,26 @@ function perfectWeek(){
 function weeklyVowPercent(){
   let checked=0;
   let total=0;
+
   for(let i=0;i<sundayVows.length;i++){
     total++;
     if(state.sundayVows[i]) checked++;
   }
+
   for(let d=1;d<=5;d++){
-    for(let i=0;i<weekdayVows.length;i++){
-      total++;
-      if(state.weekdayVows[d][i]) checked++;
+    if(d===todayIndex && state.dayMode==="light"){
+      for(let i=0;i<lightSessionVows.length;i++){
+        total++;
+        if(state.lightSessionVows[d][i]) checked++;
+      }
+    }else{
+      for(let i=0;i<weekdayVows.length;i++){
+        total++;
+        if(state.weekdayVows[d][i]) checked++;
+      }
     }
   }
+
   if(total<=0) return 0;
   return Math.floor((checked/total)*100);
 }
@@ -1509,6 +1544,9 @@ let status="REST DAY";
     status=state.finalForm==="angel" ? "PERFECT WEEK" : "WEEK FORM";
   }else if(todayIndex>=0){
     status="STEADY";
+if(state.dayMode==="light"){
+  status="LIGHT SESSION";
+}
 if(state.statuses[todayIndex]==="complete"){
   status="DAY SEALED CLEAN";
   petType="king";
@@ -1541,6 +1579,7 @@ petHTML(petType)+
     "<div class='textbox'>"+
     weekText+
  "<br><span class='subline'>STREAK DAYS: "+cleanCount()+"/6</span>"+
+(state.readinessScore!==null ? "<br><span class='subline'>"+state.readinessWeather+" / "+state.readinessScore+"% READY</span>" : "")+
 "</div>"+
 "<div class='version-line'>VER "+APP_VERSION+"</div>"+
 (DEBUG_MODE ? "<button onclick='debugAddStreak()' style='position:absolute;left:8px;bottom:4px;z-index:30;font-family:VT323;font-size:14px;background:#111;color:white;border:none;'>+STREAK</button>" : "");
@@ -1600,6 +1639,97 @@ html+="</div>";
   }
 }
 
+function showLightSessionCheck(restoreScroll=null){
+  if(!requirePower()) return;
+  if(todayIndex<0){
+    showMain();
+    return;
+  }
+
+  stopPet();
+  stopFirework();
+
+  document.getElementById("statusBar").innerHTML="LIGHT SESSION";
+
+  let html="";
+  html+="<div class='panel'>";
+  html+="<div class='panel-title'>LIGHT SESSION</div>";
+  html+="<div class='scroll' id='lightSessionScroll'>";
+  html+="<div class='small-note'>CONTROLLED PERFORMANCE. PRESERVE TOMORROW.</div>";
+
+  html+="<div class='section-label'>VOWS</div>";
+  for(let i=0;i<lightSessionVows.length;i++){
+    html+="<div class='rule'>";
+    html+="<div class='box "+(state.lightSessionVows[todayIndex][i]?"checked":"")+"' onclick='toggleLightSessionVow("+i+")'></div>";
+    html+="<div>"+lightSessionVows[i]+"</div>";
+    html+="</div>";
+  }
+
+  html+="<div class='section-label'>DAMAGE</div>";
+  html+="<div class='small-note'>ONLY MARK IF CONTAINMENT BROKE</div>";
+  for(let i=0;i<damageStates.length;i++){
+    html+="<div class='rule'>";
+    html+="<div class='box "+(state.damage[todayIndex][i]?"checked":"")+"' onclick='toggleLightSessionDamage("+i+")'></div>";
+    html+="<div>"+damageStates[i]+"</div>";
+    html+="</div>";
+  }
+
+  html+="</div>";
+  html+="<div class='panel-buttons'>";
+  html+="<button class='mini-btn' onclick='showMain()'>BACK</button>";
+  html+="<button class='mini-btn' onclick='lockDay()'>LOCK</button>";
+  html+="</div>";
+  html+="</div>";
+
+  document.getElementById("playArea").innerHTML=html;
+
+  if(restoreScroll!==null){
+    const sc=document.getElementById("lightSessionScroll");
+    if(sc) sc.scrollTop=restoreScroll;
+  }
+}
+
+function getLightSessionScrollTop(){
+  const sc=document.getElementById("lightSessionScroll");
+  return sc ? sc.scrollTop : 0;
+}
+
+function toggleLightSessionVow(i){
+  if(!requirePower()) return;
+
+  let scrollTop=getLightSessionScrollTop();
+  let wasChecked=state.lightSessionVows[todayIndex][i];
+
+  state.lightSessionVows[todayIndex][i]=!wasChecked;
+
+  if(!wasChecked){
+    playVowNote(i);
+  }else{
+    play("reset");
+  }
+
+  saveState();
+  showLightSessionCheck(scrollTop);
+}
+
+function toggleLightSessionDamage(i){
+  if(!requirePower()) return;
+
+  let scrollTop=getLightSessionScrollTop();
+  let wasChecked=state.damage[todayIndex][i];
+
+  state.damage[todayIndex][i]=!wasChecked;
+
+  if(!wasChecked){
+    state.crackActive=true;
+    playDamageNote();
+  }else{
+    play("reset");
+  }
+
+  saveState();
+  showLightSessionCheck(scrollTop);
+}
 function showRecoveryCheck(restoreScroll=null){
   if(!requirePower()) return;
   if(todayIndex<0){
@@ -1765,12 +1895,17 @@ function showCheckRouter(){
     return;
   }
 
-  if(state.dayMode==="recovery"){
-    showRecoveryCheck();
-    return;
-  }
+if(state.dayMode==="recovery"){
+  showRecoveryCheck();
+  return;
+}
 
-  showCheck();
+if(state.dayMode==="light"){
+  showLightSessionCheck();
+  return;
+}
+
+showCheck();
 }
 
 
@@ -1895,16 +2030,55 @@ function submitGateTest(){
     return;
   }
 
+state.gatePassed=true;
+state.readinessScore=getReadinessScore();
+
+if(missed===2){
+  state.dayMode="light";
+  state.readinessWeather="CLOUDY";
+}else{
   state.dayMode="trade";
-  state.gatePassed=true;
-  saveState();
-  play("good");
-  showGatePassedScreen();
+  state.readinessWeather=getReadinessWeather(state.readinessScore);
 }
 
+saveState();
+play("good");
+showGatePassedScreen();
+}
+
+function getReadinessScore(){
+  let checked=0;
+
+  for(let i=0;i<state.gateAnswers.length;i++){
+    if(state.gateAnswers[i]) checked++;
+  }
+
+  return Math.floor((checked/state.gateAnswers.length)*100);
+}
+
+function getReadinessWeather(score){
+  if(score>=90) return "CLEAR";
+  if(score>=75) return "FAIR";
+  if(score>=60) return "CLOUDY";
+  if(score>=40) return "FOGGY";
+  return "STORM";
+}
+
+function getReadinessMessage(weather){
+  if(weather==="CLEAR") return "TODAY IS FAVORABLE FOR DECISIVE ACTION.";
+  if(weather==="FAIR") return "TRADE WITH RESPECT. DO NOT FORCE.";
+  if(weather==="CLOUDY") return "MOVE SLOWLY. PROTECT CAPITAL.";
+  if(weather==="FOGGY") return "LIGHT SESSION ADVISED.";
+  return "RECOVERY ADVISED. DO NOT TRADE.";
+}
 function showGatePassedScreen(){
 
-  document.getElementById("statusBar").innerHTML="CLEARED";
+  const readiness=getReadinessScore();
+const weather=state.readinessWeather || getReadinessWeather(readiness);
+const message=getReadinessMessage(weather);
+const assignment=state.dayMode==="light" ? "LIGHT SESSION" : "NORMAL TRADE";
+
+  document.getElementById("statusBar").innerHTML="MORNING REPORT";
 
   document.getElementById("playArea").innerHTML=
     "<div class='panel'>"+
@@ -1912,11 +2086,17 @@ function showGatePassedScreen(){
     "<div class='scroll' style='display:flex;align-items:center;justify-content:center;text-align:center;font-size:28px;line-height:1.05;'>"+
     "STATUS: STABLE"+
     "<br><br>"+
-    "STANDING BY"+
+    "READINESS: "+readiness+"%"+
+    "<br><br>"+
+"WEATHER: "+weather+
+"<br><br>"+
+"ASSIGNMENT:<br>"+assignment+
+"<br><br>"+
+"<span style='font-size:22px;'>"+message+"</span>"+
     "</div>"+
     "</div>";
 
-  setTimeout(()=>showMain(true),1200);
+  setTimeout(()=>showMain(true),2200);
 }
 
 function showGateFailedScreen(){
@@ -1929,8 +2109,8 @@ function showGateFailedScreen(){
     "STATUS: COMPROMISED"+
     "<br><br>"+
     "ASSIGNMENT: RECOVERY"+
-    "<br><br>"+
-    "<span style='font-size:22px;'>DO. NOT. TRADE.</span>"+
+"<br><br>"+
+"<span style='font-size:22px;'>RECOVERY IS TRAINING.<br>DO. NOT. TRADE.</span>"+
     "</div>"+
     "<div class='panel-buttons'>"+
     "<button class='mini-btn' onclick='convertGateFailToRecovery()'>RECOVERY</button>"+
@@ -2133,6 +2313,11 @@ function mintVaultCoinsForToday(){
   let todaysVows=getTodaysVows();
   let vowState=getVowStateForToday();
 
+  if(state.dayMode==="light"){
+    todaysVows=lightSessionVows;
+    vowState=state.lightSessionVows[todayIndex];
+  }
+
   for(let i=0;i<todaysVows.length;i++){
     if(vowState[i]){
       state.vault[todaysVows[i]]++;
@@ -2162,9 +2347,13 @@ if(state.statuses[todayIndex]!=="inactive"){
   let passed=true;
   let vowState=getVowStateForToday();
 
-  if(state.dayMode==="recovery"){
-    vowState=state.recoveryVows[todayIndex];
-  }
+if(state.dayMode==="recovery"){
+  vowState=state.recoveryVows[todayIndex];
+}
+
+if(state.dayMode==="light"){
+  vowState=state.lightSessionVows[todayIndex];
+}
 
   for(let i=0;i<vowState.length;i++){
     if(!vowState[i]) passed=false;
@@ -2213,9 +2402,9 @@ if(passed){
 }else{
   state.streak=0;
 
-  if(state.dayMode==="trade"){
-    state.damageProtocolActive=true;
-  }
+if(state.dayMode==="trade" || state.dayMode==="light"){
+  state.damageProtocolActive=true;
+}
 }
 
   let shouldPlayFirework=passed && todayIndex===5 && perfectWeek();
