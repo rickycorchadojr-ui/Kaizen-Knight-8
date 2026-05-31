@@ -378,7 +378,7 @@ const powerQuotes=[
     weight:15
   }
 ];
-const APP_VERSION="7.2.1";
+const APP_VERSION="7.3.0";
 const DEBUG_MODE=false;
 const days=["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY"];
 let todayIndex=getTradingDayIndex();
@@ -2271,22 +2271,22 @@ function toggleVow(i){
   showCheck(scrollTop);
 }
 
-function toggleGrowthVow(i){
-  if(!requirePower()) return;
+function mintVaultCoinsForToday(){
+  ensureVault();
 
-  let scrollTop=getCheckScrollTop();
-  let wasChecked=state.growthVows[todayIndex][i];
+  let todaysVows=getTodaysVows();
+  let vowState=getVowStateForToday();
 
-  state.growthVows[todayIndex][i]=!wasChecked;
-
-  if(!wasChecked){
-    playVowNote(i);
-  }else{
-    play("reset");
+  if(state.dayMode==="light"){
+    todaysVows=lightSessionVows;
+    vowState=state.lightSessionVows[todayIndex];
   }
 
-  saveState();
-  showCheck(scrollTop);
+  for(let i=0;i<todaysVows.length;i++){
+    if(vowState[i]){
+      state.vault[todaysVows[i]]++;
+    }
+  }
 }
 
 function toggleDamage(i){
