@@ -378,7 +378,7 @@ const powerQuotes=[
     weight:15
   }
 ];
-const APP_VERSION="7.2.0";
+const APP_VERSION="7.2.1";
 const DEBUG_MODE=false;
 const days=["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY"];
 let todayIndex=getTradingDayIndex();
@@ -1460,7 +1460,7 @@ function chooseTradeDay(){
 
 function chooseSundayDay(){
   if(todayIndex!==0) return;
-  if(!confirm("BEGIN SUNDAY DAY?")) return;
+  if(!confirm("BEGIN SUNDAY?")) return;
 
   play("menu");
   state.dayMode="sunday";
