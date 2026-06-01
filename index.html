@@ -379,7 +379,7 @@ const powerQuotes=[
     weight:15
   }
 ];
-const APP_VERSION="7.6.0";
+const APP_VERSION="7.7.1";
 const DEBUG_MODE=false;
 const days=["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY"];
 let todayIndex=getTradingDayIndex();
@@ -395,6 +395,17 @@ let fireworkFrame=1;
 let achievementTimer=null;
 const petPositions=[50,40,32,32,44,58,66,66,54,50];
 const sounds={};
+const NOTE_FREQ={
+  C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392.00,A4:440.00,B4:493.88,C5:523.25,
+  C3:130.81,D3:146.83,E3:164.81,F3:174.61,G3:196.00,A3:220.00,B3:246.94
+};
+
+const morningGateMotif=[
+  "C4","D4","E4","G4","A4","G4","E4","D4",
+  "C4","E4","G4","A4","C5","A4","G4","E4"
+];
+
+const morningGateFinal="C5";
 function requirePower(){ return poweredOn; }
 function getTodaysVows(){ return todayIndex===0 ? sundayVows : weekdayVows; }
 function isSleepTime(){
@@ -820,6 +831,44 @@ function playVowNote(i){
   let note=sounds.vowNotes[i % sounds.vowNotes.length].cloneNode();
   note.play().catch(()=>{});
 }
+
+function playNoteName(noteName,duration=.12,volume=.55){
+  const freq=NOTE_FREQ[noteName];
+  if(!freq) return;
+
+  let note=new Audio(makeToneSequenceWav([
+    {freq:freq,duration:duration,volume:volume}
+  ]));
+
+  note.play().catch(()=>{});
+}
+
+function playMorningGateNote(i){
+  playNoteName(morningGateMotif[i % morningGateMotif.length],.13,.58);
+}
+
+function playMorningGateFinal(){
+  playNoteName(morningGateFinal,.42,.72);
+}
+
+function playLightSessionNote(i){
+  playNoteName(morningGateMotif[i % 4],.14,.55);
+}
+
+function playRecoveryNote(i){
+  const reversed=morningGateMotif.slice().reverse();
+  playNoteName(reversed[i % reversed.length],.16,.48);
+}
+
+function playDamageProtocolNote(i){
+  const lowerMotif=[
+    "C3","D3","E3","G3","A3","G3","E3","D3",
+    "C3","E3","G3","A3","C4","A3","G3","E3"
+  ];
+
+  playNoteName(lowerMotif[i % lowerMotif.length],.15,.5);
+}
+
 function playDamageNote(){
   if(!sounds.damageNote) return;
   let note=sounds.damageNote.cloneNode();
@@ -1497,7 +1546,9 @@ function chooseDamageDay(){
 
   saveState();
   showMain();
-}function showHomeAfterBoot(fromBoot=false){
+}
+
+function showHomeAfterBoot(fromBoot=false){
   if(todayIndex>=0 && state.dayMode==="undecided"){
     showMorningGate();
     return;
@@ -1505,19 +1556,22 @@ function chooseDamageDay(){
 
   showMain(fromBoot);
 }
+
 function showBoot(){
   renderDays();
   document.getElementById("screen").className="screen boot-dark";
   document.getElementById("statusBar").innerHTML="POWER";
   document.getElementById("playArea").innerHTML="<div class='boot-text'>BOOTING...</div>";
- setTimeout(()=>{ document.getElementById("statusBar").innerHTML="POWER"; },650);
-setTimeout(()=>{
-  poweredOn=true;
-  document.getElementById("screen").className="screen";
-  showHomeAfterBoot(true);
-  updateStreakMusic();
-},1200);
+
+  setTimeout(()=>{ document.getElementById("statusBar").innerHTML="POWER"; },650);
+
+  setTimeout(()=>{
+    poweredOn=true;
+    document.getElementById("screen").className="screen";
+    showHomeAfterBoot(true);
+  },1200);
 }
+
 function debugAddStreak(){
   if(!DEBUG_MODE) return;
 
@@ -1704,7 +1758,7 @@ function toggleLightSessionVow(i){
   state.lightSessionVows[todayIndex][i]=!wasChecked;
 
   if(!wasChecked){
-    playVowNote(i);
+    playLightSessionNote(i);
   }else{
     play("reset");
   }
@@ -1794,7 +1848,7 @@ function toggleRecoveryVow(i){
   state.recoveryVows[todayIndex][i]=!wasChecked;
 
   if(!wasChecked){
-    playVowNote(i);
+    playRecoveryNote(i);
   }else{
     play("reset");
   }
@@ -1874,7 +1928,7 @@ function toggleDamageProtocolVow(i){
   state.damageProtocolVows[todayIndex][i]=!wasChecked;
 
   if(!wasChecked){
-    playVowNote(i);
+    playDamageProtocolNote(i);
   }else{
     play("reset");
   }
@@ -1916,51 +1970,90 @@ function showCode(){
   stopPet();
   stopFirework();
 
-  let html="";
-  html+="<div class='panel'>";
-  html+="<div class='panel-title'>FIELD CODE</div>";
-  html+="<div class='scroll'>";
+  document.getElementById("statusBar").innerHTML="FIELD CODE";
+
+  document.getElementById("playArea").innerHTML=
+    "<div class='panel'>"+
+    "<div class='panel-title'>FIELD CODE</div>"+
+    "<div class='scroll' style='display:flex;flex-direction:column;justify-content:center;gap:10px;'>"+
+    "<button class='mini-btn' onclick='showCoreCode()'>CORE CODE</button>"+
+    "<button class='mini-btn' onclick='showManualCode()'>INSTRUCTION MANUAL</button>"+
+    "<button class='mini-btn' onclick='showMorningGateCode()'>MORNING GATE</button>"+
+    "<button class='mini-btn' onclick='showSaveCode()'>SAVE DATA</button>"+
+    "</div>"+
+    "<div class='panel-buttons'>"+
+    "<button class='mini-btn' onclick='showMain()'>BACK</button>"+
+    "</div>"+
+    "</div>";
+}
+function showCoreCode(){
+  document.getElementById("statusBar").innerHTML="CORE CODE";
+  let html="<div class='panel'><div class='panel-title'>CORE CODE</div><div class='scroll'>";
 
   for(let i=0;i<codeNotes.length;i++){
     html+="<div class='note'>"+codeNotes[i]+"</div>";
   }
 
-html+="<div class='section-label'>INSTRUCTION MANUAL</div>";
-html+="<div class='small-note'>WIN AND FAIL CONDITIONS</div>";
-
-for(let i=0;i<manualNotes.length;i++){
-  html+="<div class='note'>";
-  html+="<div style='font-size:24px;margin-bottom:4px;'>"+manualNotes[i][0]+"</div>";
-  html+="<div style='font-size:20px;opacity:.9;'>"+manualNotes[i][1]+"</div>";
-  html+="</div>";
-}
-
-html+="<div class='section-label'>MORNING GATE</div>";
-html+="<div class='small-note'>READINESS CHECK QUESTIONS</div>";
-
-for(let i=0;i<gateQuestions.length;i++){
-  html+="<div class='note'>";
-  html+="<div style='font-size:22px;'>"+(i+1)+". "+gateQuestions[i]+"</div>";
-  html+="</div>";
-}
-html+="<div class='section-label'>SAVE DATA</div>";
-html+="<div class='small-note'>BACK UP OR RESTORE YOUR KNIGHT</div>";
-
-html+="<div class='panel-buttons' style='border-top:none;padding:4px 0 10px;'>";
-html+="<button class='mini-btn' onclick='copySaveData()'>COPY SAVE</button>";
-html+="<button class='mini-btn' onclick='showImportSave()'>RESTORE</button>";
-html+="</div>";
-
-html+="</div>";
-
-html+="<div class='panel-buttons'>";
-html+="<button class='mini-btn' onclick='showMain()'>BACK</button>";
-  html+="</div>";
-
-  html+="</div>";
+  html+="</div><div class='panel-buttons'>";
+  html+="<button class='mini-btn' onclick='showCode()'>BACK</button>";
+  html+="</div></div>";
 
   document.getElementById("playArea").innerHTML=html;
 }
+
+function showManualCode(){
+  document.getElementById("statusBar").innerHTML="MANUAL";
+  let html="<div class='panel'><div class='panel-title'>MANUAL</div><div class='scroll'>";
+  html+="<div class='small-note'>WIN AND FAIL CONDITIONS</div>";
+
+  for(let i=0;i<manualNotes.length;i++){
+    html+="<div class='note'>";
+    html+="<div style='font-size:24px;margin-bottom:4px;'>"+manualNotes[i][0]+"</div>";
+    html+="<div style='font-size:20px;opacity:.9;'>"+manualNotes[i][1]+"</div>";
+    html+="</div>";
+  }
+
+  html+="</div><div class='panel-buttons'>";
+  html+="<button class='mini-btn' onclick='showCode()'>BACK</button>";
+  html+="</div></div>";
+
+  document.getElementById("playArea").innerHTML=html;
+}
+
+function showMorningGateCode(){
+  document.getElementById("statusBar").innerHTML="MORNING GATE";
+  let html="<div class='panel'><div class='panel-title'>MORNING GATE</div><div class='scroll'>";
+  html+="<div class='small-note'>READINESS CHECK QUESTIONS</div>";
+
+  for(let i=0;i<gateQuestions.length;i++){
+    html+="<div class='note'>";
+    html+="<div style='font-size:22px;'>"+(i+1)+". "+gateQuestions[i]+"</div>";
+    html+="</div>";
+  }
+
+  html+="</div><div class='panel-buttons'>";
+  html+="<button class='mini-btn' onclick='showCode()'>BACK</button>";
+  html+="</div></div>";
+
+  document.getElementById("playArea").innerHTML=html;
+}
+
+function showSaveCode(){
+  document.getElementById("statusBar").innerHTML="SAVE DATA";
+  document.getElementById("playArea").innerHTML=
+    "<div class='panel'>"+
+    "<div class='panel-title'>SAVE DATA</div>"+
+    "<div class='scroll' style='display:flex;flex-direction:column;justify-content:center;gap:10px;'>"+
+    "<div class='small-note'>BACK UP OR RESTORE YOUR KNIGHT</div>"+
+    "<button class='mini-btn' onclick='copySaveData()'>COPY SAVE</button>"+
+    "<button class='mini-btn' onclick='showImportSave()'>RESTORE</button>"+
+    "</div>"+
+    "<div class='panel-buttons'>"+
+    "<button class='mini-btn' onclick='showCode()'>BACK</button>"+
+    "</div>"+
+    "</div>";
+}
+
 function showTradeGateTest(){
   if(!requirePower()) return;
 
@@ -2002,7 +2095,7 @@ function toggleGateAnswer(i){
   state.gateAnswers[i]=!state.gateAnswers[i];
 
   if(state.gateAnswers[i]){
-    playVowNote(i);
+    playMorningGateNote(i);
   }else{
     play("reset");
   }
@@ -2034,10 +2127,10 @@ if(missed>=GATE_FAIL_LIMIT){
 
   awardRecoveryDay();
 
-  saveState();
-  play("fail");
-  showGateFailedScreen();
-  return;
+saveState();
+playMorningGateFinal();
+showGateFailedScreen();
+return;
 }
 
 state.gatePassed=true;
@@ -2052,7 +2145,7 @@ if(missed>=GATE_LIGHT_LIMIT){
 }
 
 saveState();
-play("good");
+playMorningGateFinal();
 showGatePassedScreen();
 }
 
