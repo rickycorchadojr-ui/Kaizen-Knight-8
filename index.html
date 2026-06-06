@@ -284,8 +284,9 @@ transform:scaleX(-1);
 }
 
 .gate-img{
-  max-width:220px;
-  max-height:150px;
+  width:100%;
+  max-width:none;
+  max-height:170px;
   object-fit:contain;
   image-rendering:pixelated;
   image-rendering:crisp-edges;
@@ -308,13 +309,13 @@ transform:scaleX(-1);
     </div>
   </div>
   <div class="week-row">
-    <div class="day" id="day0">SUN</div>
-    <div class="day" id="day1">MON</div>
-    <div class="day" id="day2">TUE</div>
-    <div class="day" id="day3">WED</div>
-    <div class="day" id="day4">THU</div>
-    <div class="day" id="day5">FRI</div>
-  </div>
+    <div class="day" id="day0">SU</div>
+    <div class="day" id="day1">MO</div>
+    <div class="day" id="day2">TU</div>
+    <div class="day" id="day3">WE</div>
+    <div class="day" id="day4">TH</div>
+    <div class="day" id="day5">FR</div>
+</div>
 <div class="buttons">
     <div class="control-wrap">
       <button onclick="showCheckWithMenuSound()">CHECK</button>
@@ -425,12 +426,12 @@ const codeNotes=[
   "INTEGRITY PROTECTS THE SYSTEM.",
   "RECOVERY RESTORES THE SYSTEM.",
   "FRESHNESS PRESERVES THE SYSTEM.",
-  "THE GOAL IS NOT TO WIN TODAY. THE GOAL IS TO ARRIVE TOMORROW READY AGAIN.",
+  "THE GOAL IS TO WIN THE DAY. AND TO ARRIVE TOMORROW READY AGAIN.",
   "CONSIDER STOPPING AT -250.",
   "LOOK FOR CHOP AND MANIPULATION.",
   "DON'T RELY ON STOPS. STAY ALERT.",
   "SESSION WILL END QUICKLY. BE MINDFUL.",
-  "MANAGE MOODS OUTSIDE OF TRADING.",
+  "MANAGE MOODS OUTSIDE OF TRADING. ESPECIALLY ON THE WEEKENDS.",
   "YOU ARE ALL THAT STANDS BETWEEN A PROFITABLE ACCOUNT AND THE MARKET.",
   "WHAT IF IT WORKS OUT?",
   "I AM DETERMINED TO HAVE A GOOD DAY REGARDLESS OF WHAT HAPPENS.",
@@ -505,7 +506,7 @@ const powerQuotes=[
   }
 ];
 
-const APP_VERSION="8.0.0";
+const APP_VERSION="8.0.1";
 const DEBUG_MODE=false;
 const days=["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY"];
 let todayIndex=getTradingDayIndex();
