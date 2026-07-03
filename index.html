@@ -109,6 +109,24 @@ transform:scaleX(-1);
 .achievement-banner.show{animation:achievementDrop 2.05s forwards;}
 @keyframes achievementDrop{0%{transform:translate(-50%,-120%);}18%{transform:translate(-50%,8px);}72%{transform:translate(-50%,8px);}100%{transform:translate(-50%,-120%);}}
 .streak-counter{position:absolute;top:8px;right:10px;font-size:32px;line-height:.8;color:#111;text-align:right;min-width:0;font-family:'VT323',monospace;letter-spacing:1px;z-index:5;}
+.combine-counter{
+  position:absolute;
+  top:8px;
+  left:10px;
+  font-size:26px;
+  line-height:.85;
+  color:#111;
+  text-align:left;
+  font-family:'VT323',monospace;
+  letter-spacing:1px;
+  z-index:5;
+}
+.vow-tally{
+  font-size:18px;
+  line-height:1;
+  opacity:.72;
+  margin-top:2px;
+}
 .power-quote{width:88%;background:#111;color:#e9ecd8;border:4px solid #e9ecd8;font-family:'VT323',monospace;font-size:24px;line-height:1.02;padding:14px 12px;box-shadow:none;text-align:center;}
 .power-author{display:block;margin-top:10px;font-size:22px;}
 .boot-text{color:#e9ecd8;font-size:32px;letter-spacing:2px;animation:bootPulse .8s infinite steps(2);}
@@ -966,7 +984,7 @@ const powerQuotes=[
   }
 ];
 
-const APP_VERSION="9.0.2";
+const APP_VERSION="9.0.3";
 const DEBUG_MODE=false;
 const days=["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY"];
 let todayIndex=getTradingDayIndex();
@@ -1820,6 +1838,10 @@ readinessWeather:null,
 
 streak:0,
 bestStreak:0,
+vowTallies:{},
+combineDaysCurrent:0,
+combineDaysPrevious:0,
+combineLastDayKey:getDayKey(),
 rainbowDayKey:null,
 rainbowToday:false,
 crackActive:false,
@@ -1881,6 +1903,10 @@ function loadState(){
 newState.recoveryLog=parsed.recoveryLog || [];
 newState.actionLog=parsed.actionLog || [];
 newState.vault=parsed.vault || createFreshVault();
+newState.vowTallies=parsed.vowTallies || {};
+newState.combineDaysCurrent=typeof parsed.combineDaysCurrent==="number" ? parsed.combineDaysCurrent : 0;
+newState.combineDaysPrevious=typeof parsed.combineDaysPrevious==="number" ? parsed.combineDaysPrevious : 0;
+newState.combineLastDayKey=typeof parsed.combineLastDayKey==="string" ? parsed.combineLastDayKey : getDayKey();
 const previousWeekForm = parsed.finalForm || parsed.lastWeekCompanionForm || null;
 
 newState.lastWeekCompanionForm = previousWeekForm;
@@ -1943,6 +1969,10 @@ if(!parsed.recoveryDamage || parsed.recoveryDamage.length!==6 || parsed.recovery
 }
     if(typeof parsed.streak!=="number") parsed.streak=cleanCountFromStatuses(parsed.statuses);
     if(typeof parsed.bestStreak!=="number") parsed.bestStreak=parsed.streak;
+if(!parsed.vowTallies) parsed.vowTallies={};
+if(typeof parsed.combineDaysCurrent!=="number") parsed.combineDaysCurrent=0;
+if(typeof parsed.combineDaysPrevious!=="number") parsed.combineDaysPrevious=0;
+if(typeof parsed.combineLastDayKey!=="string") parsed.combineLastDayKey=getDayKey();
 if(typeof parsed.finalForm==="undefined") parsed.finalForm=null;
 if(typeof parsed.lastWeekCompanionForm==="undefined") parsed.lastWeekCompanionForm=null;
 if(typeof parsed.companionWeekKey==="undefined") parsed.companionWeekKey=null;
@@ -2139,6 +2169,73 @@ function isCleanSprite(type){
 }
 function getPetClass(type){ return isCleanSprite(type) ? "pet-img clean-img" : "pet-img"; }
 function streakHTML(){ return "<div class='streak-counter'>"+state.streak+"</div>"; }
+function padCounter(num){
+  num=Math.max(0,parseInt(num || 0,10));
+  return String(num).padStart(3,"0");
+}
+function combineCounterHTML(){
+  ensureCombineCounterFresh();
+  return "<div class='combine-counter'>"+
+    padCounter(state.combineDaysCurrent)+
+    "<br>"+
+    padCounter(state.combineDaysPrevious)+
+    "</div>";
+}
+function ensureVowTallies(){
+  if(!state.vowTallies) state.vowTallies={};
+  let vows=weekdayVows.concat(lightSessionVows).concat(sundayVows);
+  for(let i=0;i<vows.length;i++){
+    if(typeof state.vowTallies[vows[i]]!=="number"){
+      state.vowTallies[vows[i]]=0;
+    }
+  }
+  if(typeof state.vowTallies["CHECK KAIZEN KNIGHT"]==="number"){
+    state.vowTallies["DON'T TRADE OUTSIDE ROUTINE"]=Math.max(
+      state.vowTallies["DON'T TRADE OUTSIDE ROUTINE"] || 0,
+      state.vowTallies["CHECK KAIZEN KNIGHT"] || 0
+    );
+    delete state.vowTallies["CHECK KAIZEN KNIGHT"];
+  }
+}
+function ensureCombineCounterFresh(){
+  const todayKey=getDayKey();
+  if(typeof state.combineDaysCurrent!=="number") state.combineDaysCurrent=0;
+  if(typeof state.combineDaysPrevious!=="number") state.combineDaysPrevious=0;
+  if(typeof state.combineLastDayKey!=="string") state.combineLastDayKey=todayKey;
+  if(state.combineLastDayKey===todayKey) return;
+  const last=new Date(state.combineLastDayKey+"T00:00:00");
+  const today=new Date(todayKey+"T00:00:00");
+  const diff=Math.floor((today-last)/(1000*60*60*24));
+  if(diff>0){
+    state.combineDaysCurrent+=diff;
+    state.combineLastDayKey=todayKey;
+    saveState();
+  }
+}
+function combineResetMarkedToday(){
+  if(todayIndex<0 || !state.damage || !state.damage[todayIndex]) return false;
+  const idx=damageStates.indexOf("BOUGHT / RESET COMBINE");
+  if(idx<0) return false;
+  return !!state.damage[todayIndex][idx];
+}
+function applyVowTalliesForLockedDay(vows,vowState){
+  ensureVowTallies();
+  for(let i=0;i<vows.length;i++){
+    const vowName=vows[i];
+    if(vowState[i]){
+      state.vowTallies[vowName]=(state.vowTallies[vowName] || 0)+1;
+    }else{
+      state.vowTallies[vowName]=0;
+    }
+  }
+}
+function applyCombineResetIfNeeded(){
+  ensureCombineCounterFresh();
+  if(!combineResetMarkedToday()) return;
+  state.combineDaysPrevious=state.combineDaysCurrent;
+  state.combineDaysCurrent=0;
+  state.combineLastDayKey=getDayKey();
+}
 function achievementHTML(){ return "<div class='achievement-banner' id='achievementBanner'></div>"; }
 function santaHatHTML(type){
   const month=new Date().getMonth();
@@ -2682,6 +2779,7 @@ document.getElementById("statusBar").innerHTML=status;
   document.getElementById("playArea").innerHTML=
     achievementHTML()+
     streakHTML()+
+    combineCounterHTML()+
     sceneBackgroundHTML()+
 
 weeklyVisitorHTML()+
@@ -2725,10 +2823,12 @@ function showCheck(restoreScroll=null){
   html+="<div class='scroll' id='checkScroll'>";
   html+="<div class='section-label'>VOWS</div>";
   html+="<div class='small-note'>CHECK WHAT HELD TRUE TODAY. THESE ARE YOUR COMMITMENTS.</div>";
+  ensureVowTallies();
   for(let i=0;i<todaysVows.length;i++){
+    const tally=state.vowTallies[todaysVows[i]] || 0;
     html+="<div class='rule'>";
     html+="<div class='box "+(vowState[i]?"checked":"")+"' onclick='toggleVow("+i+")'></div>";
-    html+="<div>"+todaysVows[i]+"</div>";
+    html+="<div>"+todaysVows[i]+"<div class='vow-tally'>RULE STREAK: "+tally+" DAYS</div></div>";
     html+="</div>";
   }
 html+="<div class='section-label'>GROWTH</div>";
@@ -4324,6 +4424,14 @@ if(state.dayMode==="recovery" && passed){
 }
 
   if(state.dayMode!=="recovery" && state.dayMode!=="damage"){
+    let tallyVows=getTodaysVows();
+    let tallyState=getVowStateForToday();
+    if(state.dayMode==="light"){
+      tallyVows=lightSessionVows;
+      tallyState=state.lightSessionVows[todayIndex];
+    }
+    applyVowTalliesForLockedDay(tallyVows,tallyState);
+    applyCombineResetIfNeeded();
     mintVaultCoinsForToday();
   }
 
@@ -4412,6 +4520,7 @@ if(state.dayMode==="damage" && state.damageProtocolActive){
   document.getElementById("playArea").innerHTML=
     achievementHTML()+
     streakHTML()+
+    combineCounterHTML()+
     sceneBackgroundHTML()+
     weeklyVisitorHTML()+
     flagHTML()+
@@ -4533,6 +4642,10 @@ if(!state.records) state.records=[];
 if(!state.recoveryLog) state.recoveryLog=[];
 if(!state.actionLog) state.actionLog=[];
 if(!state.vault) state.vault=createFreshVault();
+if(!state.vowTallies) state.vowTallies={};
+if(typeof state.combineDaysCurrent!=="number") state.combineDaysCurrent=0;
+if(typeof state.combineDaysPrevious!=="number") state.combineDaysPrevious=0;
+if(typeof state.combineLastDayKey!=="string") state.combineLastDayKey=getDayKey();
 if(typeof state.trainingDate==="undefined")
  state.trainingDate=getDayKey();
 
@@ -4598,6 +4711,8 @@ saveState();
 }
 ensureDailyModeFresh();
 resetTrainingForNewDay();
+ensureVowTallies();
+ensureCombineCounterFresh();
 state.crackActive=anyDamageActive();
 saveState();
 rollRainbowForToday();
