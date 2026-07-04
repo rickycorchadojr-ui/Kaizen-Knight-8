@@ -4838,7 +4838,6 @@ function showImportSave(){
 
 function restoreSaveData(){
   const box=document.getElementById("importBox");
-
   if(!box) return;
 
   try{
@@ -4851,84 +4850,47 @@ function restoreSaveData(){
 
     state=imported;
 
-// Keep restored weekly progress attached to the current visible week.
-// Without this, loadState() may treat the imported save as an old week
-// and reset the SUN-FRI progress bar after reload.
-state.weekKey=weekKey;
-
     if(!state.achievements) state.achievements={};
-if(!state.records) state.records=[];
-if(!state.recoveryLog) state.recoveryLog=[];
-if(!state.actionLog) state.actionLog=[];
-if(!state.vault) state.vault=createFreshVault();
-if(!state.vowTallies) state.vowTallies={};
-if(!state.vowMilestones) state.vowMilestones={};
-if(typeof state.combineDaysCurrent!=="number") state.combineDaysCurrent=0;
-if(typeof state.combineDaysPrevious!=="number") state.combineDaysPrevious=0;
-if(typeof state.combineLastDayKey!=="string") state.combineLastDayKey=getDayKey();
-if(typeof state.trainingDate==="undefined")
- state.trainingDate=getDayKey();
+    if(!state.records) state.records=[];
+    if(!state.recoveryLog) state.recoveryLog=[];
+    if(!state.actionLog) state.actionLog=[];
+    if(!state.vault) state.vault=createFreshVault();
 
-if(typeof state.trainingRank==="undefined")
- state.trainingRank=0;
+    if(!state.vowTallies) state.vowTallies={};
+    [
+      "DELETE VIDEOS → CHECK RECENTLY DELETED",
+      "START RECORDING BEFORE FIRST TRADE",
+      "LOCK RISK SETTINGS ON BOTH COMBINES",
+      "DON'T TRADE OUTSIDE ROUTINE",
+      "MAX 1 CONTRACT AT ALL TIMES",
+      "JOURNAL EVERY TRADE WITH FORMAT",
+      "MANTRA AFTER EVERY TRADE — NO EXCEPTIONS",
+      "IF STOP HIT ON FIRST ACCOUNT, SESSION OVER",
+      "MAX SIZE 1",
+      "ONE ACCOUNT ONLY",
+      "NO SCALING",
+      "NO 3PM SESSION",
+      "LOCK BOTH ACCOUNTS"
+    ].forEach(name=>{
+      if(typeof state.vowTallies[name]!=="number") state.vowTallies[name]=0;
+    });
 
-if(!state.trainingTargets){
- state.trainingTargets={
-  exitStars:10,
-  breakevens:20,
-  controlledLosses:10
- };
-}
+    if(typeof state.combineDaysCurrent!=="number") state.combineDaysCurrent=0;
+    if(typeof state.combineDaysPrevious!=="number") state.combineDaysPrevious=0;
+    if(typeof state.combineLastDayKey==="undefined") state.combineLastDayKey=null;
 
-if(!state.todayDrills){
- state.todayDrills={
-  exitStars:0,
-  breakevens:0,
-  controlledLosses:0
- };
-}
-
-if(!state.lifetimeDrills){
- state.lifetimeDrills={
-  exitStars:0,
-  breakevens:0,
-  controlledLosses:0
- };
-}
-
-if(typeof state.trainingDays==="undefined")
- state.trainingDays=0;
-
-if(typeof state.trainingCompletedDays==="undefined")
- state.trainingCompletedDays=0;
-
-if(typeof state.trainingCompleteToday==="undefined")
- state.trainingCompleteToday=false;
-
-if(typeof state.trainingPromotedToday==="undefined")
- state.trainingPromotedToday=false;
-if(!Array.isArray(state.actionConditions)) state.actionConditions=[];
-if(!Array.isArray(state.actionLessons)) state.actionLessons=[];
-if(!Array.isArray(state.actionStates)) state.actionStates=[];
-if(!Array.isArray(state.actionReframes)) state.actionReframes=[];
-
-ensureVault();
-repairWeeklyStatusesFromChecklist();
-saveState();
+    localStorage.setItem("kaizenKnightV5",JSON.stringify(state));
 
     play("good");
-
     document.getElementById("statusBar").innerHTML="SAVE RESTORED";
-
     setTimeout(()=>{ location.reload(); },450);
 
   }catch(e){
-
     play("fail");
-
     document.getElementById("statusBar").innerHTML="RESTORE FAILED";
   }
 }
+  
 ensureDailyModeFresh();
 resetTrainingForNewDay();
 ensureVowTallies();
